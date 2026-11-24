@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Симулятор: розпізнай фішинг</title>
+<!--
+  НАВЧАЛЬНИЙ СИМУЛЯТОР ФІШИНГУ для дослідження МАН.
+  Усі назви організацій, адреси й номери вигадані. Посилання не відкриваються.
+
+  Файли:
+    index.html    — екрани симулятора (цей файл)
+    style.css     — вигляд
+    questions.js  — ПИТАННЯ (редагуються вручну або через editor.html)
+    render.js     — як малюються повідомлення
+    app.js        — логіка: тест, навчання, підрахунок результатів
+    editor.html   — редактор питань
+
+  Режим обирається на стартовому екрані. За бажання його можна задати посиланням:
+    ?t=1  тест «до»   ?t=L  навчання   ?t=2  тест «після»   ?t=ALL  вільне тренування
+    &g=E або &g=K  — група
+-->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Стартовий екран: вибір режиму -->
+  <section id="start" class="card">
+    <span class="badge">Навчальний симулятор</span>
+    <h1 style="margin-top:10px">Розпізнай фішинг</h1>
+    <p class="small">SMS, листи, повідомлення в месенджерах і соцмережах. Посилання та вкладення можна «відкривати» й перевіряти —
+       нічого насправді не відкриється. Усі назви, адреси й номери вигадані.</p>
+
+    <label>Що проходимо?</label>
+    <div class="modes">
+      <button class="mode-btn" data-mode="1"><b>1. Тест «до»</b><span>10 повідомлень без підказок</span></button>
+      <button class="mode-btn" data-mode="L"><b>2. Навчання</b><span>пам'ятка + флеш-картки з поясненнями</span></button>
+      <button class="mode-btn" data-mode="2"><b>3. Тест «після»</b><span>10 нових повідомлень без підказок</span></button>
+      <button class="mode-btn free" data-mode="ALL"><b>Вільне тренування</b><span>усі приклади з поясненнями, для всіх охочих</span></button>
+    </div>
+    <p id="modeDesc" class="mode-desc hidden"></p>
+
+    <div id="studyFields">
+      <label for="group">Група</label>
+      <select id="group">
+        <option value="">— обери —</option>
+        <option value="E">Група Е</option>
+        <option value="K">Група К</option>
+      </select>
+      <label for="code">Секретний код (4 цифри, придумай і запам'ятай — той самий у всіх етапах)</label>
+      <input id="code" type="text" inputmode="numeric" maxlength="4" placeholder="наприклад, 4821">
+      <label class="check"><input id="honest" type="checkbox">
+        Я проходжу сам, без пошуку в інтернеті й без підказок</label>
+    </div>
+    <button id="startBtn" class="btn" disabled>Почати</button>
+    <p class="small" style="text-align:center;margin-bottom:0">Для вчителя: <a href="editor.html">редактор питань</a></p>
+  </section>
+
+  <!-- Пам'ятка (у навчанні та вільному тренуванні) -->
+  <section id="intro" class="card memo hidden">
+    <span class="badge">Навчання</span>
+    <h1 style="margin-top:10px">Як розпізнати фішинг</h1>
+    <div class="fact"><b>Фішинг</b> — це повідомлення, яке видає себе за знайому людину чи організацію, щоб ти перейшов за посиланням,
+      відкрив файл або віддав пароль, код чи дані картки. За звітом Агентства ЄС з кібербезпеки ENISA (Threat Landscape 2025),
+      фішинг — головний спосіб, яким зловмисники потрапляють у системи: <b>близько 60% випадків</b>.</div>
+    <div class="fact">Зараз фішингові листи часто пишуть за допомогою штучного інтелекту, тому вони можуть бути <b>без жодної помилки</b>.
+      Шукай не помилки, а ознаки нижче.</div>
+
+    <h2>7 ознак фішингу</h2>
+    <ul class="signs">
+      <li><span class="n">1</span><div><b>Підроблена адреса.</b> Зайві слова й дефіси (bank-secure, -delivery), дивні закінчення (.top, .xyz, .site, .click).
+        Державні сайти — лише <b>.gov.ua</b>. <i>Перевір:</i> наведи курсор або натисни на посилання й прочитай справжню адресу.</div></li>
+      <li><span class="n">2</span><div><b>Терміновість і погрози.</b> «За 24 години», «акаунт буде видалено», «рахунок заблоковано». Поспіх потрібен шахраю, щоб ти не встиг подумати.</div></li>
+      <li><span class="n">3</span><div><b>Запит секретних даних.</b> CVV-код, пароль, код з SMS, номер картки. Банки й сервіси <b>ніколи</b> їх не просять.</div></li>
+      <li><span class="n">4</span><div><b>Занадто добре, щоб бути правдою.</b> Виграш, подарунок, безкоштовні скіни, «гроші кожному».</div></li>
+      <li><span class="n">5</span><div><b>Небезпечне вкладення.</b> Архів .zip, програма .exe, подвійне розширення (Документ.pdf.exe), «засіб захисту», який треба встановити.</div></li>
+      <li><span class="n">6</span><div><b>«Друг» просить гроші чи код.</b> Новий номер, зламаний акаунт, «терміново», «нікому не кажи». <i>Перевір:</i> подзвони другові.</div></li>
+      <li><span class="n">7</span><div><b>Несподіване повідомлення.</b> Ти нічого не замовляв, не скидав пароль, не брав участі в розіграші.</div></li>
+    </ul>
+
+    <h2>Реальний приклад</h2>
+    <div class="fact">У березні 2026 року українська команда реагування на кіберінциденти <b>CERT-UA</b> попередила про листи нібито від самої CERT-UA.
+      Людям пропонували завантажити архів із «програмою захисту» і навіть створили копію сайту CERT-UA на іншому домені (.tech).
+      Насправді в архіві була шкідлива програма. Ознаки: <b>1, 5, 7</b>.</div>
+
+    <div class="rule"><b>Think Before U Click — подумай, перш ніж клікнути</b><br>
+      (гасло кампанії ENISA «Європейський місяць кібербезпеки»)<br><br>
+      <b>Зупинись</b> — не поспішай натискати.<br>
+      <b>Перевір</b> — адресу, відправника; зайди в застосунок чи на сайт сам, а не за посиланням; подзвони.<br>
+      <b>Повідом</b> — розкажи дорослим, не пересилай повідомлення далі.</div>
+
+    <div class="fact"><b>Як влаштоване тренування — флеш-картки.</b> Кожне повідомлення — це картка:
+      спочатку ти бачиш «лицьовий бік» (повідомлення) і вирішуєш, фішинг це чи ні, потім «зворотний бік» — правильну відповідь,
+      пояснення й ознаки. <b>Картки, на яких ти помилився, повертаються в кінці колоди</b>, доки не відповіси правильно.</div>
+    <p>У колоді <b id="introCount">10</b> карток. Почнімо!</p>
+    <button id="introBtn" class="btn">Почати тренування</button>
+    <p class="src">Джерела: ENISA Threat Landscape 2025 (<a href="https://www.enisa.europa.eu/" target="_blank" rel="noopener">enisa.europa.eu</a>);
+      European Cybersecurity Month (<a href="https://cybersecuritymonth.eu/" target="_blank" rel="noopener">cybersecuritymonth.eu</a>);
+      CERT-UA (<a href="https://cert.gov.ua/" target="_blank" rel="noopener">cert.gov.ua</a>).</p>
+  </section>
+
+  <!-- Екран тесту -->
+  <section id="test" class="hidden">
+    <div class="phone">
+      <div class="screen">
+        <div class="status"><span id="counter">1 / 10</span><span>12:41</span></div>
+        <div class="progress"><div id="bar" style="width:0%"></div></div>
+        <div id="context" class="context hidden"></div>
+        <div id="message" style="display:flex;flex-direction:column;flex:1"></div>
+        <div id="urlbar" class="urlbar"></div>
+        <div class="answers" id="answers">
+          <button class="ph" data-a="phish">Фішинг</button>
+          <button class="sf" data-a="safe">Безпечно</button>
+        </div>
+      </div>
+    </div>
+    <div id="fbBox" class="hidden"></div>
+  </section>
+
+  <!-- Фінальний екран -->
+  <section id="finish" class="card hidden">
+    <h1>Дякуємо!</h1>
+    <div id="finishBody"></div>
+    <button id="menuBtn" class="btn ghost">До головного меню</button>
+  </section>
+</div>
+
+<!-- Нижня панель для посилань і вкладень -->
+<div id="sheetBg" class="sheet-bg">
+  <div class="sheet">
+    <div id="sheetTitle" style="font-weight:700;font-size:16px"></div>
+    <div id="sheetAddr" class="addr"></div>
+    <div class="row">
+      <button class="btn ghost" id="sheetClose" style="margin-top:6px">Закрити</button>
+      <button class="btn" id="sheetOpen" style="margin-top:6px">Відкрити</button>
+    </div>
+    <p id="sheetNote" class="small hidden" style="margin-bottom:0"></p>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script src="render.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

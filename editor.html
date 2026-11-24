@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Редактор питань симулятора</title>
+<!--
+  РЕДАКТОР ПИТАНЬ. Відкрийте цей файл у браузері (він лежить поруч з index.html).
+  1. Додайте або змініть питання — праворуч одразу видно, як воно виглядатиме.
+  2. Натисніть «Перевірити в симуляторі», щоб пройти набір зі змінами.
+  3. Натисніть «Завантажити questions.js» і замініть цим файлом старий.
+-->
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="editor-body">
+<div class="ed">
+
+  <header class="ed-head">
+    <div>
+      <a href="index.html" class="small">← До симулятора</a>
+      <h1>Редактор питань</h1>
+      <p class="small">Зміни зберігаються в браузері як чернетка. Щоб вони потрапили в симулятор, завантажте новий <b>questions.js</b> і замініть ним старий файл.</p>
+    </div>
+    <div class="ed-actions">
+      <button class="btn ghost" id="testBtn">Перевірити в симуляторі</button>
+      <button class="btn" id="exportBtn">Завантажити questions.js</button>
+      <button class="btn ghost danger" id="resetBtn">Скасувати всі зміни</button>
+    </div>
+  </header>
+
+  <nav class="ed-tabs" id="tabs"></nav>
+  <div class="ed-balance" id="balance"></div>
+
+  <div class="ed-grid">
+    <!-- Список питань -->
+    <section class="card ed-list">
+      <div class="ed-list-head">
+        <b>Питання набору</b>
+        <button class="btn" id="newBtn" style="margin:0;width:auto;padding:8px 14px">+ Нове питання</button>
+      </div>
+      <ol id="list"></ol>
+    </section>
+
+    <!-- Форма -->
+    <section class="card ed-form">
+      <h2 id="formTitle">Нове питання</h2>
+      <div class="row2">
+        <label>Набір
+          <select id="f_set">
+            <option value="1">1 — тест «до»</option>
+            <option value="2">2 — тест «після»</option>
+            <option value="L">L — навчання</option>
+          </select></label>
+        <label>Код (id)<input id="f_id" type="text" placeholder="T1-11"></label>
+      </div>
+      <div class="row2">
+        <label>Вигляд
+          <select id="f_kind">
+            <option value="sms">SMS</option>
+            <option value="email">Лист (пошта)</option>
+            <option value="chat">Месенджер</option>
+            <option value="dm">Соцмережа (direct)</option>
+            <option value="poster">Оголошення з QR-кодом</option>
+          </select></label>
+        <label>Це фішинг?
+          <select id="f_phishing">
+            <option value="true">Так, фішинг</option>
+            <option value="false">Ні, безпечне</option>
+          </select></label>
+      </div>
+      <label>Ситуація (необов'язково) <input id="f_context" type="text" placeholder="Ти щойно купив щось у магазині."></label>
+
+      <label data-for="sms chat dm email">Відправник / назва чату <input id="f_from" type="text"></label>
+      <label data-for="email">Адреса відправника <input id="f_addr" type="text" placeholder="info@example.ua"></label>
+      <label data-for="email">Тема листа <input id="f_subject" type="text"></label>
+      <label data-for="chat dm">Підпис під іменем <input id="f_sub" type="text" placeholder="у мережі"></label>
+      <label data-for="sms">Час <input id="f_time" type="text" placeholder="12:45"></label>
+      <label data-for="poster">Заголовок оголошення <input id="f_title" type="text"></label>
+
+      <label>Текст повідомлення
+        <textarea id="f_body" rows="5"></textarea>
+        <span class="small">Посилання: <code>[що видно](справжня адреса)</code>, напр. <code>[mybank.ua/login](https://mybank-secure.top/login)</code></span>
+      </label>
+      <label data-for="email">Вкладення (необов'язково) <input id="f_attachment" type="text" placeholder="Рахунок.pdf.exe"></label>
+      <label data-for="poster">Куди веде QR-код <input id="f_qrUrl" type="text" placeholder="https://…"></label>
+
+      <fieldset id="f_signs"><legend>Ознаки фішингу</legend></fieldset>
+      <label>Пояснення (показується в навчанні) <textarea id="f_explain" rows="3"></textarea></label>
+
+      <div id="errors" class="ed-errors hidden"></div>
+      <div class="row2">
+        <button class="btn" id="saveBtn">Зберегти питання</button>
+        <button class="btn ghost" id="cancelBtn">Очистити форму</button>
+      </div>
+    </section>
+
+    <!-- Попередній перегляд -->
+    <section class="ed-preview">
+      <div class="phone">
+        <div class="screen">
+          <div class="status"><span>Попередній перегляд</span><span>12:41</span></div>
+          <div id="pv_context" class="context hidden"></div>
+          <div id="pv_message" style="display:flex;flex-direction:column;flex:1"></div>
+          <div id="urlbar" class="urlbar"></div>
+        </div>
+      </div>
+      <div id="pv_feedback"></div>
+    </section>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="questions.js"></script>
+<script src="render.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>
